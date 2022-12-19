@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vêtements - JS</title>
+    <link href="bootstrap.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-dark">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div class="collapse navbar-collapse justify-content-between" id="navbar">
+            <ul class="navbar-nav">
+              <li class="nav-item"><a class="nav-link" href="index.html">Acceuil</a></li>
+              <li class="nav-item"><button type="button" class="btn btn-link nav-link" data-bs-toggle="modal" data-bs-target="#add_clothe">Ajouter un vêtement</button></li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid p-3" id="main_container">
+        <div class='form-floating mb-3'>
+            <input type='text' class='form-control' id='search' placeholder='Rechercher' autocomplete="off">
+            <label for='search'>Rechercher</label>
+        </div>
+    
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>
+                        <select class="form-select" onchange="filter_outfit()" id="outfit_filter">
+                            <option selected value="">Provient de l'outfit</option>
+                        </select>
+                    </th>
+                    <th>Nom</th>
+                    <th>
+                        <select class="form-select" onchange="filter_type()" id="type_filter">
+                            <option selected value="">Type</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-select" onchange="filter_brands()" id="marque_filter">
+                            <option selected value="">Marque</option>
+                        </select>
+                    </th>
+                    <th>
+                        <select class="form-select" onchange="filter_saison()" id="saison_filter">
+                            <option selected value="">Saison</option>
+                        </select>
+                    </th>
+                    <th>Prix</th>
+                    <th>Image</th>
+                </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+
+    <div class="modal" id="add_clothe">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Ajouter un vêtement</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form" class="d-flex flex-column gap-2" enctype="multipart/form-data">
+                        <label for="from_outfit">De l'outfit :</label>
+                        <input type="number" class="form-control" name="from_outfit" id="from_outfit" placeholder="Ex : 4, 21">
+                        <label for="nom">Nom :</label>
+                        <input type="text" class="form-control" name="nom" id="nom" placeholder="Ex : RAY UNISEX - T-shirt imprimé">
+                        <label for="type">Type :</label>
+                        <input type="text" class="form-control" name="type" id="type" placeholder="Ex : Pull, T-shirt">
+                        <label for="marque">Marque :</label>
+                        <input type="text" class="form-control" name="marque" id="marque" placeholder="Ex : Nike, WRSTBHVR">
+                        <label for="saison">Saison :</label>
+                        <select class="form-select" id="saison" name="saison">
+                            <option selected disabled>Saison</option>
+                            <option value="1">Printemps</option>
+                            <option value="2">Eté</option>
+                            <option value="3">Automne</option>
+                            <option value="4">Hiver</option>
+                        </select>
+                        <label for="image_url">Image url :</label>
+                        <input type="text" class="form-control" name="image_url" id="image_url" placeholder="Ex : https://image/expemple.jpg">
+                        <label for="image_url">Prix :</label>
+                        <input type="text" class="form-control" name="prix" id="prix" placeholder="Ex : 8.99, 15.95">
+                        <button type="submit" class="btn btn-outline-primary">Add</button>
+                        <div class="alert alert-danger m-0 mt-2" id="error" style="display: none;"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            // Search function
+            $("#search").on("keyup",function(){
+                var value=$(this).val().toLowerCase();
+                $("tbody tr").filter(function(){
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+                });
+            });
+            $.get(`http://localhost:8000/get_all_clothes`, function(data, status){
+                var total = 0;
+                var type_array = [];
+                var brands_array = [];
+                var saison_array = [];
+                var outfit_array = [];
+                data.forEach((vetement, index) =>  {
+                    total += vetement.prix;
+                    $(`<tr id="${vetement.id}"><td class="clothe_id">${vetement.id}</td><td class="outfit_id">${vetement.deOutfitNo}</td><td>${vetement.nom}</td><td>${vetement.type}</td><td>${vetement.marque}</td><td>${vetement.saison}</td><td>${vetement.prix} €</td><td><a href="${vetement.img}" taget="_blank"><img src="${vetement.img}" style="max-height: 200px; width: auto;" class="rounded"></a></td></tr>`).appendTo("#tbody");
+                    if(!outfit_array.includes(vetement.deOutfitNo)){outfit_array.push(vetement.deOutfitNo);}
+                    if(!type_array.includes(vetement.type)){type_array.push(vetement.type);}
+                    if(!brands_array.includes(vetement.marque)){brands_array.push(vetement.marque);}
+                    if(!saison_array.includes(vetement.saison)){saison_array.push(vetement.saison);}
+                });
+                outfit_array.sort()
+                outfit_array.forEach(outfit => {$("#outfit_filter").append(`<option value="${outfit}">${outfit}</option>`);})
+                type_array.forEach(type => {$("#type_filter").append(`<option value="${type}">${type}</option>`);})
+                brands_array.sort()
+                brands_array.forEach(brand => {$("#marque_filter").append(`<option value="${brand}">${brand}</option>`);})
+                saison_array.forEach(saison => {$("#saison_filter").append(`<option value="${saison}">${saison}</option>`);})
+                $("#main_container").append(`<h3>Total d'argent dépensé : <strong>${total.toFixed(2)}</strong> €</h3>`)
+                $(".clothe_id").click(function(clothe){location = `piece.html?id=${clothe.currentTarget.innerHTML}`;});
+                $(".outfit_id").click(function(clothe){location = `outfit.html?id=${clothe.currentTarget.innerHTML}`;});
+            });
+        });
+
+        function filter_outfit() {
+            var outfit = $("#outfit_filter").val();
+            $("#tbody tr").each(function(index){
+                $(`#${$("#tbody tr")[index].id} td:nth-child(2)`).filter(function(){
+                    $($(`#${$("#tbody tr")[index].id}`)).toggle($(this).text().indexOf(outfit) > -1)
+                })
+            })
+        }
+
+        function filter_type() {
+            var type = $("#type_filter").val();
+            $("#tbody tr").each(function(index){
+                $(`#${$("#tbody tr")[index].id} td:nth-child(4)`).filter(function(){
+                    $($(`#${$("#tbody tr")[index].id}`)).toggle($(this).text().indexOf(type) > -1)
+                })
+            })
+        }
+        
+        function filter_brands(){
+            var brand = $("#marque_filter").val();
+            $("#tbody tr").each(function(index){
+                $(`#${$("#tbody tr")[index].id} td:nth-child(5)`).filter(function(){
+                    $($(`#${$("#tbody tr")[index].id}`)).toggle($(this).text().indexOf(brand) > -1)
+                })
+            })
+        }
+
+        function filter_saison(){
+            var saison = $("#saison_filter").val();
+            $("#tbody tr").each(function(index){
+                $(`#${$("#tbody tr")[index].id} td:nth-child(6)`).filter(function(){
+                    $($(`#${$("#tbody tr")[index].id}`)).toggle($(this).text().indexOf(saison) > -1);
+                })
+            })
+        }
+
+        $("#form").submit(function(e){
+            e.preventDefault();
+            $("#error").hide();
+            $.post("http://localhost:8000/new_clothe/",{nom : $("#nom").val(), type : $("#type").val(), saison : $("#saison").val(), marque : $("#marque").val(), from_outfit : $("#from_outfit").val(), prix : $("#prix").val(), image_url : $("#image_url").val()},function(data,status){$("#add_clothe").modal("hide")})
+        })
+    </script>
+
+    <style>.clothe_id:hover{cursor: pointer;}.outfit_id:hover{cursor: pointer;}</style>
+    
+</body>
+</html>

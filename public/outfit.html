@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vêtements - JS</title>
+    <link href="bootstrap.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg bg-dark">
+        <div class="container-fluid">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+          <div class="collapse navbar-collapse justify-content-between" id="navbar">
+            <ul class="navbar-nav">
+              <li class="nav-item"><a class="nav-link" href="index.html">Acceuil</a></li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="p-2" style="min-height: calc(100vh - 56px);">
+        <div class="rounded border w-100 p-2" style="min-height: 100%;">
+            <h1 id="outfitName"></h1>
+            <hr>
+            <div style="display: grid;grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));grid-column-gap: 0.5rem;grid-row-gap: 0.5rem;" id="container">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+        const id = urlParams.get('id');
+        $("#outfitName").text(`Outfit n°${id}`);
+
+        $.get(`http://localhost:8000/outfit_products?id=${id}`, function(data, status){
+            data.forEach(vetement => {
+                $(`<div class="card clothe_id" id="${vetement.id}"><h4 class="card-header">${vetement.nom}</h4><div class="d-flex flex-column justify-content-end h-100"><img src="${vetement.img}" class="card-img-bottom"></div></div></div>`).appendTo("#container");
+            });
+            $(".clothe_id").click(function(clothe){location = `piece.html?id=${clothe.currentTarget.id}`;});
+        });
+    </script>
+
+    <style>.clothe_id:hover{cursor: pointer;}.outfit_id:hover{cursor: pointer;}</style>
+    
+</body>
+</html>
